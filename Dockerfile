@@ -1,23 +1,35 @@
-FROM python:3.11-slim
+FROM python:3.11-slim as builder
 
-# Definir diretório de trabalho
-WORKDIR /app
-
-# Instalar dependências do sistema
+# Instalar dependências de build
 RUN apt-get update && apt-get install -y \
     gcc \
     && rm -rf /var/lib/apt/lists/*
 
-# Copiar requirements e instalar dependências Python
+# Criar ambiente virtual
+RUN python -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
+
+# Instalar dependências
 COPY requirements.txt .
 RUN pip install --no-cache-dir -r requirements.txt
 
-# Copiar código da aplicação
-COPY . .
+# Estágio final
+FROM python:3.11-slim
+
+# Copiar ambiente virtual
+COPY --from=builder /opt/venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
 
 # Criar usuário não-root
-RUN useradd --create-home --shell /bin/bash app \
-    && chown -R app:app /app
+RUN useradd --create-home --shell /bin/bash app
+
+# Definir diretório de trabalho
+WORKDIR /app
+
+# Copiar código da aplicação
+COPY --chown=app:app . .
+
+# Mudar para usuário não-root
 USER app
 
 # Expor porta
