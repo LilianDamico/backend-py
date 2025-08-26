@@ -11,7 +11,7 @@ from ..schemas import JobOut, FavoriteIn
 
 router = APIRouter(prefix="/api/favorites", tags=["favorites"])
 
-# Usuário demo (em produção viria do JWT)
+
 DEMO_USER = 1
 
 
@@ -37,19 +37,19 @@ async def add_favorite(
     """
     Adiciona uma vaga aos favoritos.
     """
-    # Verifica se a vaga existe
+    
     exists = await session.get(Job, payload.job_id)
     if not exists:
         raise HTTPException(status_code=404, detail="Vaga não encontrada")
 
-    # Insere ignorando conflito (já favoritada)
+    
     await session.execute(
         insert(Favorite)
         .values(user_id=DEMO_USER, job_id=payload.job_id)
         .prefix_with("ON CONFLICT DO NOTHING")
     )
     await session.commit()
-    # 201 pode ter corpo; mantenho um feedback simples
+    
     return {"message": "Vaga adicionada aos favoritos", "job_id": payload.job_id}
 
 
@@ -72,7 +72,7 @@ async def remove_favorite(
     if result.rowcount == 0:
         raise HTTPException(status_code=404, detail="Favorito não encontrado")
 
-    # Não retornar dict/JSON em 204
+
     return Response(status_code=204)
 
 

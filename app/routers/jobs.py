@@ -53,9 +53,9 @@ def _normalize_job(j: Dict[str, Any]) -> Dict[str, Any]:
         "job_type": j.get("job_type"),
         "location": j.get("candidate_required_location"),
         "url": j.get("url"),
-        "published_at": j.get("publication_date"),  # nome esperado no front
+        "published_at": j.get("publication_date"), 
         "description": j.get("description"),
-        "is_favorite": False,  # controle real fica no backend/db
+        "is_favorite": False,  
         "tags": j.get("tags") or j.get("skills") or [],
     }
 
@@ -86,11 +86,6 @@ def _slice_page(items: List[Dict[str, Any]], page: int, per_page: int) -> List[D
     end = start + per_page
     return items[start:end]
 
-
-# ---------------------------------------------------------------------------
-# Endpoints
-# ---------------------------------------------------------------------------
-
 @router.get("/jobs")
 async def list_jobs(
     q: Optional[str] = Query(None, description="Texto de busca (search)"),
@@ -114,15 +109,13 @@ async def list_jobs(
 
     Observação: Remotive não suporta offset; usamos 'limit' e paginamos localmente.
     """
-    # Pedimos apenas o necessário para cobrir até a página atual
+    
     limit = min(MAX_LIMIT, max(per_page * page, per_page))
 
     params: Dict[str, Any] = {"limit": limit}
     if q:
         params["search"] = q
     if category:
-        # A Remotive aceita NOME ou SLUG (segundo a documentação).
-        # Passamos o valor como veio da UI.
         params["category"] = category
 
     payload = await _get_json("/remote-jobs", params=params)
@@ -148,7 +141,7 @@ async def get_job(
     Busca uma vaga específica. A API pública não tem endpoint por ID;
     então buscamos um lote (limit alto) e filtramos localmente (best-effort).
     """
-    # 1ª tentativa: pedir um lote razoável
+    
     payload = await _get_json("/remote-jobs", params={"limit": MAX_LIMIT})
     items, _ = _extract_jobs_and_total(payload)
 
@@ -156,7 +149,7 @@ async def get_job(
     if match:
         return match
 
-    # fallback final: pedir sem limite (pode ser pesado — use com cautela)
+    
     payload_all = await _get_json("/remote-jobs")
     items_all, _ = _extract_jobs_and_total(payload_all)
     match = next((j for j in items_all if j["id"] == job_id or j.get("remotive_id") == job_id), None)
@@ -178,7 +171,7 @@ async def list_categories() -> List[Dict[str, str]]:
     for c in raw:
         if not isinstance(c, dict):
             continue
-        # A API costuma retornar "slug" e "name".
+        
         slug = c.get("slug")
         name = c.get("name") or c.get("category") or slug
         if not name:
@@ -187,6 +180,6 @@ async def list_categories() -> List[Dict[str, str]]:
         name_str = str(name).strip()
         out.append({"value": slug_str, "label": name_str})
 
-    # ordena por label para UX melhor
+    
     out.sort(key=lambda x: x["label"].lower())
     return out
