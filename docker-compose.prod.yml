@@ -24,7 +24,8 @@ services:
       DATABASE_URL: postgresql+asyncpg://jobify_user:${POSTGRES_PASSWORD}@database:5432/jobify
       JWT_SECRET_KEY: ${JWT_SECRET_KEY}
       REMOTIVE_BASE: https://remotive.com/api
-      FRONTEND_URL: ${FRONTEND_URL}
+      FRONTEND_URL: https://jobify-frontend-rho.vercel.app
+      CORS_ORIGINS: '["https://jobify-frontend-rho.vercel.app"]'
       DEBUG: false
     depends_on:
       database:
