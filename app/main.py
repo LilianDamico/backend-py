@@ -15,7 +15,7 @@ except Exception:  # pragma: no cover
     settings = None  # fallback simples
 
 def _cors_origins() -> List[str]:
-    defaults = ["http://localhost:3000", "http://127.0.0.1:3000"]
+    defaults = ["http://localhost:3000", "https://jobify-frontend-rho.vercel.app"]
     if not settings:
         return defaults
     origins: List[str] = []
